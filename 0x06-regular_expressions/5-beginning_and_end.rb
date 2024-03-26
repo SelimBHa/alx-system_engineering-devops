@@ -3,5 +3,5 @@
 input = ARGV[0]
 puts "Input received: #{input.inspect}"
 
-result = input.scan(/^hhhhh\wnnnn$/i).join
+result = input.scan(/^h\wn$/i).join
 puts "Result after scan: #{result.inspect}"
