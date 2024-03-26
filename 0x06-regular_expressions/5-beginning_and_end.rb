@@ -1,2 +1,7 @@
 #!/usr/bin/env ruby
-puts ARGV[0].scan(/^h.n$/).join
+
+input = ARGV[0]
+puts "Input received: #{input.inspect}"
+
+result = input.scan(/^h.n$/).join
+puts "Result after scan: #{result.inspect}"
