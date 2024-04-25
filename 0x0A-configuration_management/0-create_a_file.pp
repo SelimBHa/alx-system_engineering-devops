@@ -1,9 +1,10 @@
-# Create a file using Puppet
+# File: 0-create_a_file.pp
 
-file { '/tmp/holberton':
-  ensure  => 'present',
-  content => 'I love Puppet',
+# Puppet manifest to create a file in /tmp
+file { '/tmp/school':
+  ensure  => present,
+  mode    => '0744',
   owner   => 'www-data',
   group   => 'www-data',
-  mode    => '0744'
+  content => "I love Puppet\n",
 }
