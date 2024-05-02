@@ -3,17 +3,25 @@
 # Display information about subdomains.
 
 domain_information () {
-    line=$(dig "$2"."$1" | grep -A1 'ANSWER SECTION:' | tr '\t' '\n' | tail -2 | tr '\n' ' ')
-    echo "$2 $line" | awk '{print "The subdomain " $1 " is a " $2 " record and points to " $3}'
+    local result=$(dig +short "$2"."$1" | tail -n1)
+    if [ -z "$result" ]; then
+        echo "Error: Subdomain $2 not found for domain $1"
+    else
+        local record_type=$(dig +short "$2"."$1" | head -n1 | awk -F' ' '{print $4}')
+        echo "The subdomain $2 is a $record_type record and points to $result"
+    fi
 }
 
-if [ "$#" == 1 ]
-then
+if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
+  echo "Usage: $0 <domain> [subdomain]"
+  exit 1
+fi
+
+if [ "$#" -eq 1 ]; then
   domain_information "$1" "www"
   domain_information "$1" "lb-01"
   domain_information "$1" "web-01"
   domain_information "$1" "web-02"
-elif [ "$#" == 2 ]
-then
+elif [ "$#" -eq 2 ]; then
   domain_information "$1" "$2"
 fi
