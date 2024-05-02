@@ -1,26 +1,37 @@
 #!/usr/bin/env bash
 # Bash script that will display information about subdomains.
-function domain_check {
-	domain_names=("www" "lb-01" "web-01" "web-02")
 
-	for i in "${domain_names[@]}";
-	do
-		dig "${i}"."$1" | grep -A1 'ANSWER SECTION:' | \
-		awk 'FNR == 2 {printf "The subdomain %s is a %s record and points to %s\n", var, $4, $5}' var="$i"
-	done
+function domain_check {
+    domain_names=("www" "lb-01" "web-01" "web-02")
+
+    for i in "${domain_names[@]}";
+    do
+        result=$(dig +short "${i}"."$1")
+        if [ -z "$result" ]; then
+            echo "The subdomain $i was not found for domain $1"
+        else
+            record_type=$(dig +short "${i}"."$1" | head -n1 | awk -F' ' '{print $4}')
+            echo "The subdomain $i is a $record_type record and points to $result"
+        fi
+    done
 }
 
 function subdomain_check {
-	dig "${2}"."$1" | grep -A1 'ANSWER SECTION:' | \
-	awk 'FNR == 2 {printf "The subdomain %s is a %s record and points to %s\n", var, $4, $5}' var="$2"
+    result=$(dig +short "${2}"."$1")
+    if [ -z "$result" ]; then
+        echo "The subdomain $2 was not found for domain $1"
+    else
+        record_type=$(dig +short "${2}"."$1" | head -n1 | awk -F' ' '{print $4}')
+        echo "The subdomain $2 is a $record_type record and points to $result"
+    fi
 }
 
 if [ $# -lt 1 ]
 then
-	echo "*** Provide domain name ***"
+    echo "*** Provide domain name ***"
 elif [ $# -eq 1 ]
 then
-	domain_check "$1";
+    domain_check "$1";
 else
-	subdomain_check "$1" "$2";
+    subdomain_check "$1" "$2";
 fi
