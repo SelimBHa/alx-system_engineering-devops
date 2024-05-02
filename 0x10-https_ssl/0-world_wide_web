@@ -1,27 +1,26 @@
 #!/usr/bin/env bash
-# Usage: ./1-world_wide_web <domain> <subdomain>
-# Display information about subdomains.
+# Bash script that will display information about subdomains.
+function domain_check {
+	domain_names=("www" "lb-01" "web-01" "web-02")
 
-domain_information () {
-    local result=$(dig +short "$2"."$1" | tail -n1)
-    if [ -z "$result" ]; then
-        echo "Error: Subdomain $2 not found for domain $1"
-    else
-        local record_type=$(dig +short "$2"."$1" | head -n1 | awk -F' ' '{print $4}')
-        echo "The subdomain $2 is a $record_type record and points to $result"
-    fi
+	for i in "${domain_names[@]}";
+	do
+		dig "${i}"."$1" | grep -A1 'ANSWER SECTION:' | \
+		awk 'FNR == 2 {printf "The subdomain %s is a %s record and points to %s\n", var, $4, $5}' var="$i"
+	done
 }
 
-if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
-  echo "Usage: $0 <domain> [subdomain]"
-  exit 1
-fi
+function subdomain_check {
+	dig "${2}"."$1" | grep -A1 'ANSWER SECTION:' | \
+	awk 'FNR == 2 {printf "The subdomain %s is a %s record and points to %s\n", var, $4, $5}' var="$2"
+}
 
-if [ "$#" -eq 1 ]; then
-  domain_information "$1" "www"
-  domain_information "$1" "lb-01"
-  domain_information "$1" "web-01"
-  domain_information "$1" "web-02"
-elif [ "$#" -eq 2 ]; then
-  domain_information "$1" "$2"
+if [ $# -lt 1 ]
+then
+	echo "*** Provide domain name ***"
+elif [ $# -eq 1 ]
+then
+	domain_check "$1";
+else
+	subdomain_check "$1" "$2";
 fi
